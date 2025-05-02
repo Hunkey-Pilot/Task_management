@@ -1,11 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:task_management/ui/controller/login_controller.dart';
 import 'package:task_management/ui/screen/bottom_nav_bar.dart';
 import 'package:task_management/ui/screen/register_screen.dart';
 import 'package:task_management/ui/widget/center_circle_indicator.dart';
 import 'package:task_management/ui/widget/screen_background.dart';
-
+import 'package:get/get.dart';
 import '../../data/models/loginModel.dart';
 import '../../data/serviece/client_network.dart';
 import '../../data/utils/urls.dart';
@@ -24,7 +25,9 @@ class _loginScreenState extends State<loginScreen> {
   final TextEditingController _emailTEController = TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final Login_Controller _loginController = Get.find<Login_Controller>();
   bool _loginInProcess = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -137,22 +140,11 @@ class _loginScreenState extends State<loginScreen> {
   }
 
   Future<void> _login() async {
-    _loginInProcess = true;
-    setState(() {});
-    Map<String, dynamic> requestBody = {
-      "email": _emailTEController.text.trim(),
-      "password": _passwordTEController.text
-    };
-    NetworkResponse response = await ClientNetwork.postRequest(
-      url: Urls.loginUrl,
-      body: requestBody,
+    final bool isSuccess = await _loginController.login(
+      _emailTEController.text.trim(),
+      _passwordTEController.text,
     );
-    _loginInProcess = false;
-    setState(() {});
-    if (response.isSuccess) {
-      LoginModel loginModel = LoginModel.fromJson(response.data!);
-      AuthController.saveUserInformation(loginModel.token, loginModel.userModel);
-
+    if (isSuccess) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
@@ -161,7 +153,8 @@ class _loginScreenState extends State<loginScreen> {
             (predicate) => false,
       );
     } else {
-      showSnackBarMassage(context, response.errorMassage, true);
+      showSnackBarMassage(
+          context, _loginController._errorMassage!, true);
     }
   }
 

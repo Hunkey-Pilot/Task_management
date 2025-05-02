@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:task_management/control_binder.dart';
 import 'package:task_management/ui/screen/splash_screen.dart';
+import 'package:get/get.dart';
 
 class TaskManagerApp extends StatefulWidget {
   const TaskManagerApp({super.key});
@@ -15,7 +17,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       navigatorKey: TaskManagerApp.navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -49,6 +51,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
           )
       ),
       home: const SplashScreen(),
+      initialBinding: Control_Binder(),
     );
   }
 
