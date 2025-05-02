@@ -6,8 +6,10 @@ import 'package:task_management/ui/screen/register_screen.dart';
 import 'package:task_management/ui/widget/center_circle_indicator.dart';
 import 'package:task_management/ui/widget/screen_background.dart';
 
+import '../../data/models/loginModel.dart';
 import '../../data/serviece/client_network.dart';
 import '../../data/utils/urls.dart';
+import '../controller/auth_controller.dart';
 import '../widget/snack_bar.dart';
 import 'forget_Password_email_verify.dart';
 
@@ -134,31 +136,38 @@ class _loginScreenState extends State<loginScreen> {
     );
   }
 
-  Future<void> _loginUser() async {
+  Future<void> _login() async {
     _loginInProcess = true;
     setState(() {});
     Map<String, dynamic> requestBody = {
       "email": _emailTEController.text.trim(),
       "password": _passwordTEController.text
     };
-
     NetworkResponse response = await ClientNetwork.postRequest(
-        url: Urls.loginUrl, body: requestBody);
+      url: Urls.loginUrl,
+      body: requestBody,
+    );
     _loginInProcess = false;
     setState(() {});
-    if(response.isSuccess){
-      Navigator.pushAndRemoveUntil(context,
-          MaterialPageRoute(builder: (context)=>MainBottomNavBar()),
-              (predicate) => false
+    if (response.isSuccess) {
+      LoginModel loginModel = LoginModel.fromJson(response.data!);
+      AuthController.saveUserInformation(loginModel.token, loginModel.userModel);
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const MainBottomNavBar(),
+        ),
+            (predicate) => false,
       );
-    } else{
-      showSnackBarMassage(context, response.errorMassage ,true);
+    } else {
+      showSnackBarMassage(context, response.errorMassage, true);
     }
   }
 
   void _onTapSubmitButton(){
     if (_formKey.currentState!.validate()) {
-      _loginUser();
+      _login();
     }
 
   }
